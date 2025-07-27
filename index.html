@@ -2,66 +2,103 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Ổ Quay Súng – Mô phỏng đơn giản</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ổ Quay Súng – Mô phỏng đẹp & mobile</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #1c1c1c;
-      color: white;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
+      color: #fefefe;
       text-align: center;
-      padding: 30px;
+      padding: 20px;
     }
     h1 {
       color: #ff5252;
+      margin-bottom: 10px;
     }
     #revolver {
-      margin: 40px auto;
+      margin: 30px auto;
       position: relative;
-      width: 200px;
-      height: 200px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle at center, #3a3a3a, #111);
+      border-radius: 50%;
+      box-shadow: inset 0 0 30px #000;
     }
     .chamber {
-      width: 40px;
-      height: 40px;
-      background: #333;
-      border: 2px solid #aaa;
+      width: 48px;
+      height: 48px;
+      background: #444;
+      border: 3px solid #aaa;
       border-radius: 50%;
       position: absolute;
       transform-origin: center center;
+      transition: background 0.3s;
     }
     .loaded {
       background: red;
+      box-shadow: 0 0 8px #ff0000;
     }
     .fire-position {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 50%;
       position: absolute;
-      top: 75px;
-      left: 75px;
+      top: 90px;
+      left: 90px;
       border: 2px dashed #fff;
     }
     button {
-      padding: 10px 20px;
+      padding: 12px 24px;
       margin: 10px;
       font-weight: bold;
+      font-size: 1rem;
+      background: #ff5252;
+      color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #ff7373;
     }
     .log {
       margin-top: 20px;
       background: #222;
-      padding: 10px;
-      border-radius: 5px;
-      height: 120px;
+      padding: 12px;
+      border-radius: 6px;
+      height: 140px;
       overflow-y: auto;
+      font-size: 0.95rem;
+      width: 90%;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: inset 0 0 5px #000;
+    }
+    @media (max-width: 500px) {
+      #revolver {
+        width: 180px;
+        height: 180px;
+      }
+      .chamber {
+        width: 36px;
+        height: 36px;
+      }
+      .fire-position {
+        width: 48px;
+        height: 48px;
+        top: 66px;
+        left: 66px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>🔫 Mô phỏng ổ quay – 8 lỗ</h1>
+  <h1>🔫 Ổ Quay Súng (8 lỗ)</h1>
   <div id="revolver">
     <div class="fire-position"></div>
   </div>
@@ -85,8 +122,9 @@
         const angle = (360 / total) * i;
         const div = document.createElement("div");
         div.className = "chamber";
-        div.style.top = 80 + 70 * Math.sin((angle * Math.PI) / 180) + "px";
-        div.style.left = 80 + 70 * Math.cos((angle * Math.PI) / 180) + "px";
+        const radius = 80;
+        div.style.top = 90 + radius * Math.sin((angle * Math.PI) / 180) + "px";
+        div.style.left = 90 + radius * Math.cos((angle * Math.PI) / 180) + "px";
         chambers[i] = false;
         revolver.appendChild(div);
       }
@@ -118,7 +156,7 @@
       const result = chambers[current];
       if (result) {
         log("💥 BANG! Trúng đạn!");
-        chambers[current] = false; // bóp xong trúng thì hết đạn
+        chambers[current] = false;
       } else {
         log("✅ Click! Không có đạn.");
       }
