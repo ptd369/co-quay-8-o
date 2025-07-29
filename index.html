@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Mobile Fix Lắc + Ổ Đạn Tròn</title>
+  <title>Trò Chơi Súng Lục – Ổ Đạn Xoay Thật</title>
   <style>
     html, body {
       margin: 0;
@@ -131,8 +131,14 @@
     }
 
     function spinCylinder() {
-      current = Math.floor(Math.random() * 8);
+      const shift = Math.floor(Math.random() * 8);
+      current = 0;
+      chambers = rotateArray(chambers, shift);
       playSound("sfx-spin");
+    }
+
+    function rotateArray(arr, count) {
+      return arr.slice(count).concat(arr.slice(0, count));
     }
 
     function fire() {
@@ -188,7 +194,6 @@
         div.className = 'chamber' + (chambers[i] ? ' loaded' : '');
         div.style.left = `${x - 20}px`;
         div.style.top = `${y - 20}px`;
-        div.title = `Ổ số ${i + 1}`;
         div.onclick = () => {
           const wasLoaded = chambers[i];
           chambers[i] = !chambers[i];
