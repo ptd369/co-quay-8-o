@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Mobile Optimized</title>
+  <title>Trò Chơi Súng Lục – Mobile + Ổ Đạn Tròn</title>
   <style>
     html, body {
       margin: 0;
@@ -22,6 +22,8 @@
     .container {
       text-align: center;
       width: 100vw;
+      position: relative;
+      z-index: 1;
     }
     .gun-image {
       width: 55vw;
@@ -84,25 +86,24 @@
     }
     .cylinder-view {
       display: none;
-      position: absolute;
-      bottom: 10vh;
-      background: rgba(0,0,0,0.6);
-      padding: 20px;
-      border-radius: 50%;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 200px;
       height: 200px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2;
     }
     .chamber {
+      position: absolute;
       width: 40px;
       height: 40px;
       background: #444;
       border: 2px solid #aaa;
       border-radius: 50%;
-      margin: 5px;
+      cursor: pointer;
     }
     .chamber.loaded {
       background: red;
@@ -207,16 +208,20 @@
 
     function updateCylinder() {
       cylinder.innerHTML = '';
-      chambers.forEach((hasBullet, i) => {
+      const radius = 80;
+      for (let i = 0; i < 8; i++) {
+        const angle = (360 / 8) * i;
         const div = document.createElement('div');
-        div.className = 'chamber' + (hasBullet ? ' loaded' : '');
+        div.className = 'chamber' + (chambers[i] ? ' loaded' : '');
+        div.style.left = `${100 + radius * Math.cos(angle * Math.PI / 180)}px`;
+        div.style.top = `${100 + radius * Math.sin(angle * Math.PI / 180)}px`;
         div.title = `Ổ số ${i + 1}`;
         div.onclick = () => {
           chambers[i] = !chambers[i];
           updateCylinder();
         }
         cylinder.appendChild(div);
-      });
+      }
     }
 
     window.addEventListener("devicemotion", function(e) {
