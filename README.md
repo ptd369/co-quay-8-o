@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Mobile + Ổ Đạn Tròn</title>
+  <title>Trò Chơi Súng Lục – Mobile + Ổ Đạn Tròn Chuẩn</title>
   <style>
     html, body {
       margin: 0;
@@ -90,8 +90,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 200px;
-      height: 200px;
+      width: 220px;
+      height: 220px;
       border-radius: 50%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 2;
@@ -202,24 +202,28 @@
     }
 
     function toggleCylinderView() {
-      cylinder.style.display = cylinder.style.display === 'flex' ? 'none' : 'flex';
+      cylinder.style.display = cylinder.style.display === 'block' ? 'none' : 'block';
       updateCylinder();
     }
 
     function updateCylinder() {
       cylinder.innerHTML = '';
       const radius = 80;
+      const centerX = 110;
+      const centerY = 110;
       for (let i = 0; i < 8; i++) {
-        const angle = (360 / 8) * i;
+        const angle = (360 / 8) * i * Math.PI / 180;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
         const div = document.createElement('div');
         div.className = 'chamber' + (chambers[i] ? ' loaded' : '');
-        div.style.left = `${100 + radius * Math.cos(angle * Math.PI / 180)}px`;
-        div.style.top = `${100 + radius * Math.sin(angle * Math.PI / 180)}px`;
+        div.style.left = `${x - 20}px`;
+        div.style.top = `${y - 20}px`;
         div.title = `Ổ số ${i + 1}`;
         div.onclick = () => {
           chambers[i] = !chambers[i];
           updateCylinder();
-        }
+        };
         cylinder.appendChild(div);
       }
     }
