@@ -3,28 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ổ Quay Súng – Mô phỏng đẹp & mobile</title>
+  <title>Ổ Quay Súng – Mô phỏng hoàn chỉnh</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #2d2d2d, #1a1a1a);
-      color: #fefefe;
+      background: url('assets/bg.jpg') center center / cover no-repeat;
+      color: #fff;
       text-align: center;
       padding: 20px;
     }
     h1 {
       color: #ff5252;
-      margin-bottom: 10px;
+      text-shadow: 1px 1px 2px #000;
+    }
+    #revolver-wrapper {
+      position: relative;
+      display: inline-block;
     }
     #revolver {
-      margin: 30px auto;
+      margin: 20px auto;
       position: relative;
       width: 240px;
       height: 240px;
       background: radial-gradient(circle at center, #3a3a3a, #111);
       border-radius: 50%;
       box-shadow: inset 0 0 30px #000;
+      z-index: 1;
+    }
+    .gun-image {
+      position: absolute;
+      width: 300px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.3;
+      z-index: 0;
+      pointer-events: none;
     }
     .chamber {
       width: 48px;
@@ -33,7 +48,6 @@
       border: 3px solid #aaa;
       border-radius: 50%;
       position: absolute;
-      transform-origin: center center;
       transition: background 0.3s;
     }
     .loaded {
@@ -67,7 +81,7 @@
     }
     .log {
       margin-top: 20px;
-      background: #222;
+      background: rgba(0, 0, 0, 0.7);
       padding: 12px;
       border-radius: 6px;
       height: 140px;
@@ -99,8 +113,11 @@
 </head>
 <body>
   <h1>🔫 Ổ Quay Súng (8 lỗ)</h1>
-  <div id="revolver">
-    <div class="fire-position"></div>
+  <div id="revolver-wrapper">
+    <img class="gun-image" src="assets/gun.jpg" alt="Hình khẩu súng">
+    <div id="revolver">
+      <div class="fire-position"></div>
+    </div>
   </div>
 
   <button onclick="loadBullet()">🔄 Nạp đạn</button>
@@ -109,12 +126,26 @@
 
   <div class="log" id="log"></div>
 
+  <!-- Âm thanh -->
+  <audio id="sfx-load" src="assets/reload.mp3"></audio>
+  <audio id="sfx-spin" src="assets/spin.mp3"></audio>
+  <audio id="sfx-fire" src="assets/gunshot.mp3"></audio>
+  <audio id="sfx-click" src="assets/click.mp3"></audio>
+
   <script>
     const revolver = document.getElementById("revolver");
     const logBox = document.getElementById("log");
     const chambers = [];
     const total = 8;
     let current = 0;
+
+    function playSound(id) {
+      const audio = document.getElementById(id);
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play();
+      }
+    }
 
     function createChambers() {
       revolver.querySelectorAll(".chamber").forEach(e => e.remove());
@@ -143,21 +174,25 @@
       if (empty.length === 0) return log("❗Ổ đã đầy!");
       const randomIndex = empty[Math.floor(Math.random() * empty.length)];
       chambers[randomIndex] = true;
+      playSound("sfx-load");
       updateChambers();
       log(`🔫 Nạp đạn vào ổ số ${randomIndex + 1}`);
     }
 
     function spinCylinder() {
       current = Math.floor(Math.random() * total);
+      playSound("sfx-spin");
       log("🌀 Đã xoay ổ quay.");
     }
 
     function fire() {
       const result = chambers[current];
       if (result) {
-        log("💥 BANG! Trúng đạn!");
         chambers[current] = false;
+        playSound("sfx-fire");
+        log("💥 BANG! Trúng đạn!");
       } else {
+        playSound("sfx-click");
         log("✅ Click! Không có đạn.");
       }
       current = (current + 1) % total;
