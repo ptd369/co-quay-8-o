@@ -2,87 +2,115 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trò Chơi Súng Lục – Trung Tâm Màn Hình</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Trò Chơi Súng Lục – Màn Hình Ngang Mobile</title>
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
+      overflow: hidden;
       background: url('assets/background.jpg') center center / cover no-repeat;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       font-family: 'Segoe UI', sans-serif;
     }
+    body {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      text-align: center;
+      width: 100vw;
+    }
     .gun-image {
-      width: 80vw;
-      max-width: 850px;
+      width: 70vw;
+      max-width: 600px;
       height: auto;
       pointer-events: none;
-      image-rendering: auto;
+      transition: transform 0.1s ease;
     }
-    .controls {
-      margin-top: 20px;
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
+    .smoke {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: url('assets/smoke.png') center center / contain no-repeat;
+      opacity: 0;
+      animation: puff 0.5s ease-out forwards;
     }
-    .controls button {
-      padding: 12px 20px;
-      font-size: 1.1rem;
+    @keyframes puff {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .bullet {
+      position: absolute;
+      width: 20px;
+      height: 10px;
+      background: gold;
+      border-radius: 5px;
+      animation: fly 0.5s ease-out forwards;
+    }
+    @keyframes fly {
+      0% { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1); }
+      100% { left: 100vw; top: 40%; transform: translate(-50%, -50%) scale(1.2); }
+    }
+    .controls, .debug-controls {
+      margin-top: 10px;
+    }
+    .controls button, .debug-controls button {
+      padding: 10px 18px;
+      margin: 5px;
       font-weight: bold;
+      font-size: 1rem;
       border: none;
       border-radius: 6px;
       background-color: #ff5252;
       color: white;
       cursor: pointer;
-      transition: background 0.3s;
     }
-    .controls button:hover {
-      background-color: #ff7474;
+    .debug-controls {
+      display: none;
     }
     .log {
-      margin-top: 20px;
       background: rgba(0,0,0,0.6);
-      padding: 10px;
-      border-radius: 6px;
       color: white;
-      font-size: 1rem;
-      width: 90%;
-      max-width: 500px;
-      height: 120px;
+      padding: 8px;
+      margin-top: 10px;
+      height: 100px;
       overflow-y: auto;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <img src="assets/gun.png" alt="Khẩu súng" class="gun-image">
-
-  <div class="controls">
-    <button onclick="loadBullet()">🔄 Nạp đạn</button>
-    <button onclick="spinCylinder()">🌀 Xoay ổ</button>
-    <button onclick="fire()">🔥 Bóp cò</button>
+  <div class="container">
+    <img src="assets/gun.png" alt="Khẩu súng" class="gun-image" id="gun">
+    <div class="controls">
+      <button onclick="loadBullet()">🔄 Nạp đạn</button>
+      <button onclick="spinCylinder()">🌀 Xoay ổ</button>
+      <button onclick="toggleDebug()">🔍 Xem ổ đạn</button>
+    </div>
+    <div class="debug-controls" id="debug">
+      <button onclick="moveBullet()">🔁 Đổi vị trí viên đạn</button>
+    </div>
+    <div class="log" id="log"></div>
   </div>
 
-  <div class="log" id="log"></div>
-
-  <!-- Âm thanh -->
   <audio id="sfx-load" src="assets/reload.mp3"></audio>
   <audio id="sfx-spin" src="assets/spin.mp3"></audio>
   <audio id="sfx-fire" src="assets/gunshot.mp3"></audio>
   <audio id="sfx-click" src="assets/click.mp3"></audio>
 
   <script>
-    const chambers = Array(8).fill(false);
+    const gun = document.getElementById('gun');
+    const logBox = document.getElementById('log');
+    const debugBox = document.getElementById('debug');
+    let chambers = Array(8).fill(false);
     let current = 0;
 
     function log(msg) {
-      const box = document.getElementById("log");
-      box.innerHTML += `> ${msg}<br>`;
-      box.scrollTop = box.scrollHeight;
+      logBox.innerHTML += `> ${msg}<br>`;
+      logBox.scrollTop = logBox.scrollHeight;
     }
 
     function playSound(id) {
@@ -95,32 +123,78 @@
 
     function loadBullet() {
       const empty = chambers.map((v, i) => (!v ? i : -1)).filter(i => i !== -1);
-      if (empty.length === 0) return log("❗Ổ đã đầy!");
-      const pick = empty[Math.floor(Math.random() * empty.length)];
-      chambers[pick] = true;
+      if (!empty.length) return log("❗Ổ đã đầy!");
+      const index = empty[Math.floor(Math.random() * empty.length)];
+      chambers[index] = true;
       playSound("sfx-load");
-      log(`🔫 Nạp đạn vào ổ số ${pick + 1}`);
+      log(`🔫 Nạp đạn vào ổ số ${index + 1}`);
     }
 
     function spinCylinder() {
-      current = Math.floor(Math.random() * chambers.length);
+      current = Math.floor(Math.random() * 8);
       playSound("sfx-spin");
       log("🌀 Xoay ổ quay...");
     }
 
     function fire() {
-      const result = chambers[current];
-      if (result) {
+      const fired = chambers[current];
+      if (fired) {
         chambers[current] = false;
         playSound("sfx-fire");
         log("💥 BANG! Trúng đạn!");
+        showSmoke();
+        showBullet();
+        shakeGun();
       } else {
         playSound("sfx-click");
         log("✅ Click! Không có đạn.");
       }
-      current = (current + 1) % chambers.length;
+      current = (current + 1) % 8;
     }
+
+    function showSmoke() {
+      const smoke = document.createElement('div');
+      smoke.className = 'smoke';
+      document.body.appendChild(smoke);
+      setTimeout(() => smoke.remove(), 600);
+    }
+
+    function showBullet() {
+      const bullet = document.createElement('div');
+      bullet.className = 'bullet';
+      document.body.appendChild(bullet);
+      setTimeout(() => bullet.remove(), 600);
+    }
+
+    function shakeGun() {
+      gun.style.transform = 'rotate(-2deg)';
+      setTimeout(() => gun.style.transform = 'rotate(2deg)', 60);
+      setTimeout(() => gun.style.transform = 'rotate(0)', 120);
+    }
+
+    function toggleDebug() {
+      debugBox.style.display = debugBox.style.display === 'block' ? 'none' : 'block';
+      log("👁️ Đang xem ổ đạn...");
+    }
+
+    function moveBullet() {
+      const indexes = chambers.map((val, i) => val ? i : -1).filter(i => i !== -1);
+      if (indexes.length === 0) return log("⚠️ Không có đạn để di chuyển");
+      const oldIndex = indexes[0];
+      chambers[oldIndex] = false;
+      let newIndex;
+      do {
+        newIndex = Math.floor(Math.random() * 8);
+      } while (chambers[newIndex]);
+      chambers[newIndex] = true;
+      log(`🔁 Di chuyển đạn từ ô ${oldIndex + 1} → ô ${newIndex + 1}`);
+    }
+
+    window.addEventListener("devicemotion", function(e) {
+      const acc = e.accelerationIncludingGravity;
+      const strength = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+      if (strength > 30) fire();
+    });
   </script>
 </body>
 </html>
-
