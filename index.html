@@ -21,6 +21,7 @@
       max-width: 850px;
       height: auto;
       pointer-events: none;
+      image-rendering: auto;
     }
     .controls {
       margin-top: 20px;
@@ -58,7 +59,7 @@
   </style>
 </head>
 <body>
-  <img src="assets/gun.jpg" alt="Khẩu súng" class="gun-image">
+  <img src="assets/gun.png" alt="Khẩu súng" class="gun-image">
 
   <div class="controls">
     <button onclick="loadBullet()">🔄 Nạp đạn</button>
