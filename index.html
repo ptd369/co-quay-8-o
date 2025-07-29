@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Ổ Đạn Xoay Thật</title>
+  <title>Trò Chơi Súng Lục – Xoay Ổ Có Hiệu Ứng</title>
   <style>
     html, body {
       margin: 0;
@@ -84,6 +84,10 @@
       border-radius: 50%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 2;
+      transition: transform 0.8s ease-in-out;
+    }
+    .cylinder-view.spin {
+      transform: translate(-50%, -50%) rotate(720deg);
     }
     .chamber {
       position: absolute;
@@ -134,7 +138,10 @@
       const shift = Math.floor(Math.random() * 8);
       current = 0;
       chambers = rotateArray(chambers, shift);
+      cylinder.classList.add('spin');
+      setTimeout(() => cylinder.classList.remove('spin'), 900);
       playSound("sfx-spin");
+      updateCylinder();
     }
 
     function rotateArray(arr, count) {
@@ -216,3 +223,4 @@
   </script>
 </body>
 </html>
+
