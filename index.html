@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Mobile + Ổ Đạn Tròn Chuẩn</title>
+  <title>Trò Chơi Súng Lục – Mobile Fix Lắc + Ổ Đạn Tròn</title>
   <style>
     html, body {
       margin: 0;
@@ -73,17 +73,6 @@
       color: white;
       cursor: pointer;
     }
-    .log {
-      background: rgba(0,0,0,0.6);
-      color: white;
-      padding: 6px;
-      margin-top: 8px;
-      height: 80px;
-      overflow-y: auto;
-      font-size: 0.8rem;
-      width: 90vw;
-      max-width: 420px;
-    }
     .cylinder-view {
       display: none;
       position: fixed;
@@ -114,11 +103,9 @@
   <div class="container">
     <img src="assets/gun.png" alt="Khẩu súng" class="gun-image" id="gun">
     <div class="controls">
-      <button onclick="loadBullet()">🔄 Nạp đạn</button>
       <button onclick="spinCylinder()">🌀 Xoay ổ</button>
-      <button onclick="toggleCylinderView()">🔍 Xem ổ đạn</button>
+      <button onclick="toggleCylinderView()">🔄 Nạp đạn</button>
     </div>
-    <div class="log" id="log"></div>
   </div>
 
   <div class="cylinder-view" id="cylinderView"></div>
@@ -130,15 +117,10 @@
 
   <script>
     const gun = document.getElementById('gun');
-    const logBox = document.getElementById('log');
     const cylinder = document.getElementById('cylinderView');
     let chambers = Array(8).fill(false);
     let current = 0;
-
-    function log(msg) {
-      logBox.innerHTML += `> ${msg}<br>`;
-      logBox.scrollTop = logBox.scrollHeight;
-    }
+    let lastShake = 0;
 
     function playSound(id) {
       const audio = document.getElementById(id);
@@ -148,20 +130,9 @@
       }
     }
 
-    function loadBullet() {
-      const empty = chambers.map((v, i) => (!v ? i : -1)).filter(i => i !== -1);
-      if (!empty.length) return log("❗Ổ đã đầy!");
-      const index = empty[Math.floor(Math.random() * empty.length)];
-      chambers[index] = true;
-      playSound("sfx-load");
-      updateCylinder();
-      log(`🔫 Nạp đạn vào ổ số ${index + 1}`);
-    }
-
     function spinCylinder() {
       current = Math.floor(Math.random() * 8);
       playSound("sfx-spin");
-      log("🌀 Xoay ổ quay...");
     }
 
     function fire() {
@@ -169,13 +140,11 @@
       if (fired) {
         chambers[current] = false;
         playSound("sfx-fire");
-        log("💥 BANG! Trúng đạn!");
         showSmoke();
         showBullet();
         shakeGun();
       } else {
         playSound("sfx-click");
-        log("✅ Click! Không có đạn.");
       }
       current = (current + 1) % 8;
       updateCylinder();
@@ -221,7 +190,9 @@
         div.style.top = `${y - 20}px`;
         div.title = `Ổ số ${i + 1}`;
         div.onclick = () => {
+          const wasLoaded = chambers[i];
           chambers[i] = !chambers[i];
+          if (!wasLoaded && chambers[i]) playSound("sfx-load");
           updateCylinder();
         };
         cylinder.appendChild(div);
@@ -231,7 +202,11 @@
     window.addEventListener("devicemotion", function(e) {
       const acc = e.accelerationIncludingGravity;
       const strength = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-      if (strength > 30) fire();
+      const now = Date.now();
+      if (strength > 25 && now - lastShake > 1000) {
+        fire();
+        lastShake = now;
+      }
     });
   </script>
 </body>
