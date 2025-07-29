@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Màn Hình Ngang Mobile</title>
+  <title>Trò Chơi Súng Lục – Mobile Optimized</title>
   <style>
     html, body {
       margin: 0;
@@ -14,9 +14,9 @@
     }
     body {
       display: flex;
-      flex-direction: row;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       height: 100vh;
     }
     .container {
@@ -24,8 +24,8 @@
       width: 100vw;
     }
     .gun-image {
-      width: 70vw;
-      max-width: 600px;
+      width: 55vw;
+      max-width: 400px;
       height: auto;
       pointer-events: none;
       transition: transform 0.1s ease;
@@ -54,31 +54,58 @@
       0% { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1); }
       100% { left: 100vw; top: 40%; transform: translate(-50%, -50%) scale(1.2); }
     }
-    .controls, .debug-controls {
+    .controls {
       margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .controls button, .debug-controls button {
+    .controls button {
       padding: 10px 18px;
-      margin: 5px;
+      font-size: 0.9rem;
       font-weight: bold;
-      font-size: 1rem;
       border: none;
       border-radius: 6px;
       background-color: #ff5252;
       color: white;
       cursor: pointer;
     }
-    .debug-controls {
-      display: none;
-    }
     .log {
       background: rgba(0,0,0,0.6);
       color: white;
-      padding: 8px;
-      margin-top: 10px;
-      height: 100px;
+      padding: 6px;
+      margin-top: 8px;
+      height: 80px;
       overflow-y: auto;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
+      width: 90vw;
+      max-width: 420px;
+    }
+    .cylinder-view {
+      display: none;
+      position: absolute;
+      bottom: 10vh;
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      border-radius: 50%;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    .chamber {
+      width: 40px;
+      height: 40px;
+      background: #444;
+      border: 2px solid #aaa;
+      border-radius: 50%;
+      margin: 5px;
+    }
+    .chamber.loaded {
+      background: red;
     }
   </style>
 </head>
@@ -88,13 +115,12 @@
     <div class="controls">
       <button onclick="loadBullet()">🔄 Nạp đạn</button>
       <button onclick="spinCylinder()">🌀 Xoay ổ</button>
-      <button onclick="toggleDebug()">🔍 Xem ổ đạn</button>
-    </div>
-    <div class="debug-controls" id="debug">
-      <button onclick="moveBullet()">🔁 Đổi vị trí viên đạn</button>
+      <button onclick="toggleCylinderView()">🔍 Xem ổ đạn</button>
     </div>
     <div class="log" id="log"></div>
   </div>
+
+  <div class="cylinder-view" id="cylinderView"></div>
 
   <audio id="sfx-load" src="assets/reload.mp3"></audio>
   <audio id="sfx-spin" src="assets/spin.mp3"></audio>
@@ -104,7 +130,7 @@
   <script>
     const gun = document.getElementById('gun');
     const logBox = document.getElementById('log');
-    const debugBox = document.getElementById('debug');
+    const cylinder = document.getElementById('cylinderView');
     let chambers = Array(8).fill(false);
     let current = 0;
 
@@ -127,6 +153,7 @@
       const index = empty[Math.floor(Math.random() * empty.length)];
       chambers[index] = true;
       playSound("sfx-load");
+      updateCylinder();
       log(`🔫 Nạp đạn vào ổ số ${index + 1}`);
     }
 
@@ -150,6 +177,7 @@
         log("✅ Click! Không có đạn.");
       }
       current = (current + 1) % 8;
+      updateCylinder();
     }
 
     function showSmoke() {
@@ -172,22 +200,23 @@
       setTimeout(() => gun.style.transform = 'rotate(0)', 120);
     }
 
-    function toggleDebug() {
-      debugBox.style.display = debugBox.style.display === 'block' ? 'none' : 'block';
-      log("👁️ Đang xem ổ đạn...");
+    function toggleCylinderView() {
+      cylinder.style.display = cylinder.style.display === 'flex' ? 'none' : 'flex';
+      updateCylinder();
     }
 
-    function moveBullet() {
-      const indexes = chambers.map((val, i) => val ? i : -1).filter(i => i !== -1);
-      if (indexes.length === 0) return log("⚠️ Không có đạn để di chuyển");
-      const oldIndex = indexes[0];
-      chambers[oldIndex] = false;
-      let newIndex;
-      do {
-        newIndex = Math.floor(Math.random() * 8);
-      } while (chambers[newIndex]);
-      chambers[newIndex] = true;
-      log(`🔁 Di chuyển đạn từ ô ${oldIndex + 1} → ô ${newIndex + 1}`);
+    function updateCylinder() {
+      cylinder.innerHTML = '';
+      chambers.forEach((hasBullet, i) => {
+        const div = document.createElement('div');
+        div.className = 'chamber' + (hasBullet ? ' loaded' : '');
+        div.title = `Ổ số ${i + 1}`;
+        div.onclick = () => {
+          chambers[i] = !chambers[i];
+          updateCylinder();
+        }
+        cylinder.appendChild(div);
+      });
     }
 
     window.addEventListener("devicemotion", function(e) {
