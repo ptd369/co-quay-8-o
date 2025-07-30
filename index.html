@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Súng Lục – Hoàn thiện bắn & xoay</title>
+  <title>Súng Lục Cò Quay</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', sans-serif;
       overflow: hidden;
       background: black;
-      font-family: 'Segoe UI', sans-serif;
     }
     body.landscape {
       background: url('assets/background.jpg') center center / cover no-repeat;
@@ -249,7 +249,7 @@
       const acc = e.accelerationIncludingGravity;
       const strength = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
       const now = Date.now();
-      if (strength > 25 && now - lastShake > 1000) {
+      if (strength > 20 && now - lastShake > 800) {
         fire();
         lastShake = now;
       }
