@@ -2,65 +2,47 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Xoay Theo Âm Thanh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Súng Lục – Chạm Để Bắt Đầu</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: url('assets/background.jpg') center center / cover no-repeat;
+      background: black;
       font-family: 'Segoe UI', sans-serif;
-      transform: rotate(90deg);
-      transform-origin: center center;
-      height: 100vw;
-      width: 100vh;
     }
-    body {
+    body.landscape {
+      background: url('assets/background.jpg') center center / cover no-repeat;
+    }
+    .start-screen {
+      position: fixed;
+      inset: 0;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      background: black;
+      color: white;
+      font-size: 24px;
+      z-index: 9999;
+    }
+    .container {
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-    }
-    .container {
+      height: 100vh;
+      width: 100vw;
       text-align: center;
-      width: 100vh;
       position: relative;
-      z-index: 1;
     }
     .gun-image {
-      width: 50vh;
+      width: 60vw;
       max-width: 400px;
-      height: auto;
-      pointer-events: none;
       transition: transform 0.1s ease;
     }
-    .smoke {
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      background: url('assets/smoke.png') center center / contain no-repeat;
-      opacity: 0;
-      animation: puff 0.5s ease-out forwards;
-    }
-    @keyframes puff {
-      0% { transform: scale(0.5); opacity: 1; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-    .bullet {
-      position: absolute;
-      width: 20px;
-      height: 10px;
-      background: gold;
-      border-radius: 5px;
-      animation: fly 0.5s ease-out forwards;
-    }
-    @keyframes fly {
-      0% { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1); }
-      100% { left: 100vw; top: 40%; transform: translate(-50%, -50%) scale(1.2); }
-    }
     .controls {
-      margin-top: 10px;
+      margin-top: 12px;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -87,7 +69,7 @@
       border-radius: 50%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 2;
-      transition: transform 3s cubic-bezier(0.1, 0.9, 0.5, 1.5);
+      transition: transform 3s ease-out;
     }
     .cylinder-view.spin {
       transform: translate(-50%, -50%) rotate(1440deg);
@@ -104,11 +86,27 @@
     .chamber.loaded {
       background: red;
     }
+    @media screen and (orientation: portrait) {
+      body.landscape::before {
+        content: 'Vui lòng xoay ngang màn hình để chơi';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.85);
+        color: white;
+        padding: 20px;
+        font-size: 18px;
+        border-radius: 10px;
+        z-index: 10000;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="assets/gun.png" alt="Khẩu súng" class="gun-image" id="gun">
+  <div class="start-screen" id="startScreen">Chạm để bắt đầu</div>
+  <div class="container" id="gameContainer">
+    <img src="assets/gun.png" class="gun-image" id="gun">
     <div class="controls">
       <button onclick="spinCylinder()">🌀 Xoay ổ</button>
       <button onclick="toggleCylinderView()">🔄 Nạp đạn</button>
@@ -124,11 +122,25 @@
 
   <script>
     const gun = document.getElementById('gun');
+    const container = document.getElementById('gameContainer');
+    const startScreen = document.getElementById('startScreen');
     const cylinder = document.getElementById('cylinderView');
     const spinAudio = document.getElementById('sfx-spin');
     let chambers = Array(8).fill(false);
     let current = 0;
     let lastShake = 0;
+
+    window.onload = () => {
+      ['sfx-load','sfx-spin','sfx-fire','sfx-click'].forEach(id => {
+        document.getElementById(id).load();
+      });
+    }
+
+    startScreen.addEventListener('click', () => {
+      startScreen.style.display = 'none';
+      container.style.display = 'flex';
+      document.body.classList.add('landscape');
+    });
 
     function playSound(id) {
       const audio = document.getElementById(id);
@@ -141,14 +153,12 @@
     function spinCylinder() {
       const shift = Math.floor(Math.random() * 8);
       chambers = rotateArray(chambers, shift);
-      current = 0;
+      current = shift;
       cylinder.classList.add('spin');
       playSound("sfx-spin");
-
       spinAudio.onended = () => {
         cylinder.classList.remove('spin');
       };
-
       updateCylinder();
     }
 
@@ -157,40 +167,17 @@
     }
 
     function fire() {
-      if (!cylinder.style.display || cylinder.style.display === 'none') {
+      if (cylinder.style.display !== 'block') {
         const fired = chambers[current];
         if (fired) {
           chambers[current] = false;
           playSound("sfx-fire");
-          showSmoke();
-          showBullet();
-          shakeGun();
         } else {
           playSound("sfx-click");
         }
         current = (current + 1) % 8;
         updateCylinder();
       }
-    }
-
-    function showSmoke() {
-      const smoke = document.createElement('div');
-      smoke.className = 'smoke';
-      document.body.appendChild(smoke);
-      setTimeout(() => smoke.remove(), 600);
-    }
-
-    function showBullet() {
-      const bullet = document.createElement('div');
-      bullet.className = 'bullet';
-      document.body.appendChild(bullet);
-      setTimeout(() => bullet.remove(), 600);
-    }
-
-    function shakeGun() {
-      gun.style.transform = 'rotate(-2deg)';
-      setTimeout(() => gun.style.transform = 'rotate(2deg)', 60);
-      setTimeout(() => gun.style.transform = 'rotate(0)', 120);
     }
 
     function toggleCylinderView() {
@@ -225,7 +212,7 @@
       const acc = e.accelerationIncludingGravity;
       const strength = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
       const now = Date.now();
-      if (strength > 25 && now - lastShake > 1200) {
+      if (strength > 25 && now - lastShake > 1000) {
         fire();
         lastShake = now;
       }
