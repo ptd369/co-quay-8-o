@@ -249,7 +249,7 @@
       const acc = e.accelerationIncludingGravity;
       const strength = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
       const now = Date.now();
-      if (strength > 15 && now - lastShake > 800) {
+      if (strength > 20 && now - lastShake > 800) {
         fire();
         lastShake = now;
       }
