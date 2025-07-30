@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Xoay Ổ Có Hiệu Ứng</title>
+  <title>Trò Chơi Súng Lục – Xoay Chuẩn + Màn Hình Ngang</title>
   <style>
     html, body {
       margin: 0;
@@ -11,22 +11,25 @@
       overflow: hidden;
       background: url('assets/background.jpg') center center / cover no-repeat;
       font-family: 'Segoe UI', sans-serif;
+      transform: rotate(90deg); /* Màn hình ngang trên điện thoại */
+      transform-origin: center center;
+      height: 100vw;
+      width: 100vh;
     }
     body {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
     }
     .container {
       text-align: center;
-      width: 100vw;
+      width: 100vh;
       position: relative;
       z-index: 1;
     }
     .gun-image {
-      width: 55vw;
+      width: 50vh;
       max-width: 400px;
       height: auto;
       pointer-events: none;
@@ -84,10 +87,10 @@
       border-radius: 50%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 2;
-      transition: transform 0.8s ease-in-out;
+      transition: transform 3s cubic-bezier(0.1, 0.9, 0.5, 1.5);
     }
     .cylinder-view.spin {
-      transform: translate(-50%, -50%) rotate(720deg);
+      transform: translate(-50%, -50%) rotate(1440deg);
     }
     .chamber {
       position: absolute;
@@ -136,10 +139,10 @@
 
     function spinCylinder() {
       const shift = Math.floor(Math.random() * 8);
-      current = 0;
       chambers = rotateArray(chambers, shift);
+      current = 0;
       cylinder.classList.add('spin');
-      setTimeout(() => cylinder.classList.remove('spin'), 900);
+      setTimeout(() => cylinder.classList.remove('spin'), 3000);
       playSound("sfx-spin");
       updateCylinder();
     }
@@ -149,18 +152,20 @@
     }
 
     function fire() {
-      const fired = chambers[current];
-      if (fired) {
-        chambers[current] = false;
-        playSound("sfx-fire");
-        showSmoke();
-        showBullet();
-        shakeGun();
-      } else {
-        playSound("sfx-click");
+      if (!cylinder.style.display || cylinder.style.display === 'none') {
+        const fired = chambers[current];
+        if (fired) {
+          chambers[current] = false;
+          playSound("sfx-fire");
+          showSmoke();
+          showBullet();
+          shakeGun();
+        } else {
+          playSound("sfx-click");
+        }
+        current = (current + 1) % 8;
+        updateCylinder();
       }
-      current = (current + 1) % 8;
-      updateCylinder();
     }
 
     function showSmoke() {
@@ -215,7 +220,7 @@
       const acc = e.accelerationIncludingGravity;
       const strength = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
       const now = Date.now();
-      if (strength > 25 && now - lastShake > 1000) {
+      if (strength > 25 && now - lastShake > 1200) {
         fire();
         lastShake = now;
       }
@@ -223,4 +228,3 @@
   </script>
 </body>
 </html>
-
