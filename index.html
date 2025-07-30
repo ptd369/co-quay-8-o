@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Trò Chơi Súng Lục – Xoay Chuẩn + Màn Hình Ngang</title>
+  <title>Trò Chơi Súng Lục – Xoay Theo Âm Thanh</title>
   <style>
     html, body {
       margin: 0;
@@ -11,7 +11,7 @@
       overflow: hidden;
       background: url('assets/background.jpg') center center / cover no-repeat;
       font-family: 'Segoe UI', sans-serif;
-      transform: rotate(90deg); /* Màn hình ngang trên điện thoại */
+      transform: rotate(90deg);
       transform-origin: center center;
       height: 100vw;
       width: 100vh;
@@ -125,6 +125,7 @@
   <script>
     const gun = document.getElementById('gun');
     const cylinder = document.getElementById('cylinderView');
+    const spinAudio = document.getElementById('sfx-spin');
     let chambers = Array(8).fill(false);
     let current = 0;
     let lastShake = 0;
@@ -142,8 +143,12 @@
       chambers = rotateArray(chambers, shift);
       current = 0;
       cylinder.classList.add('spin');
-      setTimeout(() => cylinder.classList.remove('spin'), 3000);
       playSound("sfx-spin");
+
+      spinAudio.onended = () => {
+        cylinder.classList.remove('spin');
+      };
+
       updateCylinder();
     }
 
