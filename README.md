@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Súng Lục – Chạm Để Bắt Đầu</title>
+  <title>Súng Lục – Hoàn thiện bắn & xoay</title>
   <style>
     html, body {
       margin: 0;
@@ -69,10 +69,13 @@
       border-radius: 50%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 2;
-      transition: transform 3s ease-out;
     }
-    .cylinder-view.spin {
-      transform: translate(-50%, -50%) rotate(1440deg);
+    .cylinder-view.spinning {
+      animation: spinEffect 3s ease-out;
+    }
+    @keyframes spinEffect {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(1440deg); }
     }
     .chamber {
       position: absolute;
@@ -85,6 +88,30 @@
     }
     .chamber.loaded {
       background: red;
+    }
+    .smoke {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: url('assets/smoke.png') center center / contain no-repeat;
+      opacity: 0;
+      animation: puff 0.5s ease-out forwards;
+    }
+    .bullet {
+      position: absolute;
+      width: 20px;
+      height: 10px;
+      background: gold;
+      border-radius: 5px;
+      animation: fly 0.5s ease-out forwards;
+    }
+    @keyframes puff {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    @keyframes fly {
+      0% { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1); }
+      100% { left: 100vw; top: 40%; transform: translate(-50%, -50%) scale(1.2); }
     }
     @media screen and (orientation: portrait) {
       body.landscape::before {
@@ -130,12 +157,6 @@
     let current = 0;
     let lastShake = 0;
 
-    window.onload = () => {
-      ['sfx-load','sfx-spin','sfx-fire','sfx-click'].forEach(id => {
-        document.getElementById(id).load();
-      });
-    }
-
     startScreen.addEventListener('click', () => {
       startScreen.style.display = 'none';
       container.style.display = 'flex';
@@ -150,20 +171,18 @@
       }
     }
 
-    function spinCylinder() {
-      const shift = Math.floor(Math.random() * 8);
-      chambers = rotateArray(chambers, shift);
-      current = shift;
-      cylinder.classList.add('spin');
-      playSound("sfx-spin");
-      spinAudio.onended = () => {
-        cylinder.classList.remove('spin');
-      };
-      updateCylinder();
+    function showSmoke() {
+      const smoke = document.createElement('div');
+      smoke.className = 'smoke';
+      document.body.appendChild(smoke);
+      setTimeout(() => smoke.remove(), 600);
     }
 
-    function rotateArray(arr, count) {
-      return arr.slice(count).concat(arr.slice(0, count));
+    function showBullet() {
+      const bullet = document.createElement('div');
+      bullet.className = 'bullet';
+      document.body.appendChild(bullet);
+      setTimeout(() => bullet.remove(), 600);
     }
 
     function fire() {
@@ -172,12 +191,30 @@
         if (fired) {
           chambers[current] = false;
           playSound("sfx-fire");
+          showSmoke();
+          showBullet();
         } else {
           playSound("sfx-click");
         }
         current = (current + 1) % 8;
         updateCylinder();
       }
+    }
+
+    function spinCylinder() {
+      const shift = Math.floor(Math.random() * 8);
+      chambers = rotateArray(chambers, shift);
+      current = shift;
+      cylinder.classList.add('spinning');
+      playSound("sfx-spin");
+      spinAudio.onended = () => {
+        cylinder.classList.remove('spinning');
+      };
+      updateCylinder();
+    }
+
+    function rotateArray(arr, count) {
+      return arr.slice(count).concat(arr.slice(0, count));
     }
 
     function toggleCylinderView() {
