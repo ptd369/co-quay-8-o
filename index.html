@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Súng ổ quay - Revolver</title>
+  <title>Súng ổ quay - Chuẩn logic</title>
   <style>
     body {
       margin: 0;
@@ -36,14 +36,7 @@
       height: 240px;
       border-radius: 50%;
       background-color: rgba(0, 0, 0, 0.6);
-      transition: transform 3s ease-out;
-    }
-    .cylinder.spinning {
-      animation: spinAnim 3s ease-out;
-    }
-    @keyframes spinAnim {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(1440deg); } /* 4 vòng */
+      transform-origin: center;
     }
     .chamber {
       position: absolute;
@@ -96,6 +89,7 @@
     const totalChambers = 8;
     let chambers = new Array(totalChambers).fill(false);
     let lastFireTime = 0;
+    let currentAngle = 0;
 
     function renderCylinder() {
       const cyl = document.getElementById("cylinder");
@@ -125,7 +119,7 @@
 
     function fire() {
       const now = Date.now();
-      if (now - lastFireTime < 1000) return;
+      if (now - lastFireTime < 1000) return; // cách nhau 1 giây
       lastFireTime = now;
 
       if (chambers[0]) {
@@ -138,7 +132,7 @@
         click.currentTime = 0;
         click.play();
       }
-      chambers.unshift(chambers.pop()); // Xoay theo chiều kim đồng hồ
+      chambers.unshift(chambers.pop()); // xoay theo chiều kim đồng hồ
       renderCylinder();
     }
 
@@ -146,19 +140,23 @@
       const cyl = document.getElementById("cylinder");
       const spinSound = document.getElementById("sfx-spin");
 
-      cyl.classList.add("spinning");
-      spinSound.currentTime = 0;
-      spinSound.play();
+      const steps = Math.floor(Math.random() * totalChambers);
+      const anglePerStep = 360 / totalChambers;
+      const spinAngle = steps * anglePerStep + 1440; // xoay đẹp mắt
 
-      const n = Math.floor(Math.random() * totalChambers);
-      for (let i = 0; i < n; i++) {
+      // Xoay mảng dữ liệu
+      for (let i = 0; i < steps; i++) {
         chambers.unshift(chambers.pop());
       }
 
-      setTimeout(() => {
-        cyl.classList.remove("spinning");
-        renderCylinder();
-      }, 3000);
+      currentAngle += spinAngle;
+      cyl.style.transition = "transform 3s ease-out";
+      cyl.style.transform = `rotate(${currentAngle}deg)`;
+
+      spinSound.currentTime = 0;
+      spinSound.play();
+
+      setTimeout(renderCylinder, 3000);
     }
 
     function toggleLoad() {
@@ -167,7 +165,7 @@
       renderCylinder();
     }
 
-    // Cảm biến lắc điện thoại để bắn
+    // Lắc điện thoại để bắn
     let lastX = null, lastY = null, lastZ = null;
     window.addEventListener("devicemotion", (event) => {
       const acc = event.accelerationIncludingGravity;
@@ -176,9 +174,7 @@
         const dy = acc.y - lastY;
         const dz = acc.z - lastZ;
         const speed = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (speed > 25) {
-          fire();
-        }
+        if (speed > 25) fire();
       }
       lastX = acc.x;
       lastY = acc.y;
@@ -189,3 +185,4 @@
   </script>
 </body>
 </html>
+
