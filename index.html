@@ -19,6 +19,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
     }
     .gun-container {
       position: relative;
@@ -29,7 +30,7 @@
     }
     .cylinder {
       position: absolute;
-      top: 55px;   /* Tuỳ chỉnh theo vị trí nòng */
+      top: 55px;
       left: 172px;
       width: 240px;
       height: 240px;
@@ -42,7 +43,7 @@
     }
     @keyframes spinAnim {
       0% { transform: rotate(0deg); }
-      100% { transform: rotate(1440deg); } /* 4 vòng */
+      100% { transform: rotate(1440deg); } /* 4 vòng xoay */
     }
     .chamber {
       position: absolute;
@@ -57,10 +58,7 @@
       background: red;
     }
     .controls {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-top: 20px;
       display: flex;
       gap: 12px;
     }
@@ -116,7 +114,9 @@
         chamber.style.top = `${y - 20}px`;
         chamber.onclick = () => {
           chambers[i] = !chambers[i];
-          if (chambers[i]) document.getElementById("sfx-load").play();
+          const reload = document.getElementById("sfx-load");
+          reload.currentTime = 0;
+          reload.play();
           renderCylinder();
         };
         cyl.appendChild(chamber);
@@ -126,24 +126,37 @@
     function fire() {
       if (chambers[0]) {
         chambers[0] = false;
-        document.getElementById("sfx-fire").play();
+        const fire = document.getElementById("sfx-fire");
+        fire.currentTime = 0;
+        fire.play();
       } else {
-        document.getElementById("sfx-click").play();
+        const click = document.getElementById("sfx-click");
+        click.currentTime = 0;
+        click.play();
       }
-      chambers.unshift(chambers.pop()); // Xoay 1 bước theo chiều kim đồng hồ
+      chambers.unshift(chambers.pop()); // Xoay đúng chiều kim đồng hồ
       renderCylinder();
     }
 
     function spin() {
+      const cyl = document.getElementById("cylinder");
+      const spinSound = document.getElementById("sfx-spin");
+
+      // Thêm hiệu ứng xoay đồng bộ với âm thanh
+      cyl.classList.add("spinning");
+      spinSound.currentTime = 0;
+      spinSound.play();
+
       const n = Math.floor(Math.random() * totalChambers);
       for (let i = 0; i < n; i++) {
-        chambers.unshift(chambers.pop());
+        chambers.unshift(chambers.pop()); // Xoay ổ theo chiều kim đồng hồ
       }
-      const cyl = document.getElementById("cylinder");
-      cyl.classList.add("spinning");
-      document.getElementById("sfx-spin").play();
-      setTimeout(() => cyl.classList.remove("spinning"), 3000);
-      renderCylinder();
+
+      // Gỡ class sau khi xoay xong
+      setTimeout(() => {
+        cyl.classList.remove("spinning");
+        renderCylinder();
+      }, 3000);
     }
 
     function toggleLoad() {
