@@ -12,7 +12,6 @@
       font-family: sans-serif;
       overflow: hidden;
     }
-
     .container {
       position: absolute;
       top: 50%;
@@ -22,7 +21,6 @@
       flex-direction: column;
       align-items: center;
     }
-
     .cylinder {
       position: relative;
       width: 240px;
@@ -30,7 +28,6 @@
       border-radius: 50%;
       background-color: rgba(0, 0, 0, 0.6);
     }
-
     .chamber {
       position: absolute;
       width: 40px;
@@ -40,17 +37,14 @@
       border-radius: 50%;
       transition: 0.2s;
     }
-
     .chamber.loaded {
       background: red;
     }
-
     .controls {
       margin-top: 20px;
       display: flex;
       gap: 10px;
     }
-
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -90,7 +84,8 @@
       const radius = 85;
 
       for (let i = 0; i < totalChambers; i++) {
-        const angle = (i * 360 / totalChambers - 90) * Math.PI / 180;
+        // Đặt chambers[0] ở trên cùng
+        const angle = ((i * 360 / totalChambers) - 90) * Math.PI / 180;
         const x = center + radius * Math.cos(angle);
         const y = center + radius * Math.sin(angle);
         const chamber = document.createElement("div");
@@ -114,14 +109,16 @@
       } else {
         document.getElementById("sfx-click").play();
       }
-      // sau khi bắn, xoay ổ 1 bước theo chiều kim đồng hồ
-      chambers.push(chambers.shift());
+      // Xoay đúng chiều kim đồng hồ (cuối lên đầu)
+      chambers.unshift(chambers.pop());
       renderCylinder();
     }
 
     function spin() {
       const n = Math.floor(Math.random() * totalChambers);
-      chambers = chambers.slice(n).concat(chambers.slice(0, n));
+      for (let i = 0; i < n; i++) {
+        chambers.unshift(chambers.pop());
+      }
       document.getElementById("sfx-spin").play();
       renderCylinder();
     }
