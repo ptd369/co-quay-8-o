@@ -24,18 +24,25 @@
       position: relative;
     }
     .gun-img {
-      width: 500px;
+      width: 600px;
       pointer-events: none;
     }
     .cylinder {
       position: absolute;
-      top: 58px;  /* tùy chỉnh nếu cần */
-      left: 142px;
+      top: 55px;   /* Tuỳ chỉnh theo vị trí nòng */
+      left: 172px;
       width: 240px;
       height: 240px;
       border-radius: 50%;
       background-color: rgba(0, 0, 0, 0.6);
-      pointer-events: auto;
+      transition: transform 3s ease-out;
+    }
+    .cylinder.spinning {
+      animation: spinAnim 3s ease-out;
+    }
+    @keyframes spinAnim {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(1440deg); } /* 4 vòng */
     }
     .chamber {
       position: absolute;
@@ -44,6 +51,7 @@
       background: #333;
       border: 2px solid #aaa;
       border-radius: 50%;
+      transition: 0.2s;
     }
     .chamber.loaded {
       background: red;
@@ -122,7 +130,7 @@
       } else {
         document.getElementById("sfx-click").play();
       }
-      chambers.unshift(chambers.pop());
+      chambers.unshift(chambers.pop()); // Xoay 1 bước theo chiều kim đồng hồ
       renderCylinder();
     }
 
@@ -131,7 +139,10 @@
       for (let i = 0; i < n; i++) {
         chambers.unshift(chambers.pop());
       }
+      const cyl = document.getElementById("cylinder");
+      cyl.classList.add("spinning");
       document.getElementById("sfx-spin").play();
+      setTimeout(() => cyl.classList.remove("spinning"), 3000);
       renderCylinder();
     }
 
@@ -145,3 +156,4 @@
   </script>
 </body>
 </html>
+
