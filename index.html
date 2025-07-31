@@ -43,7 +43,7 @@
     }
     @keyframes spinAnim {
       0% { transform: rotate(0deg); }
-      100% { transform: rotate(1440deg); }
+      100% { transform: rotate(1440deg); } /* 4 vòng */
     }
     .chamber {
       position: absolute;
@@ -138,7 +138,7 @@
         click.currentTime = 0;
         click.play();
       }
-      chambers.unshift(chambers.pop());
+      chambers.unshift(chambers.pop()); // Xoay theo chiều kim đồng hồ
       renderCylinder();
     }
 
@@ -167,7 +167,7 @@
       renderCylinder();
     }
 
-    // Cảm biến lắc để bắn
+    // Cảm biến lắc điện thoại để bắn
     let lastX = null, lastY = null, lastZ = null;
     window.addEventListener("devicemotion", (event) => {
       const acc = event.accelerationIncludingGravity;
